@@ -17,10 +17,30 @@ impl NodeScriptifier {
     fn sanitize_name(&mut self, base: &String) -> String {
         let current_mark = self.registry.entry(base.clone()).or_insert(0);
         *current_mark += 1;
+
+        let parts = base
+            .split(&['_', '-'])
+            .filter(|p| !p.is_empty())
+            .collect::<Vec<&str>>();
+
+        let mut normalized = String::with_capacity(base.len());
+        normalized.push_str(parts.first().unwrap());
+
+        for part in parts.iter().skip(1) {
+            normalized.push(
+                part.chars()
+                    .into_iter()
+                    .next()
+                    .unwrap()
+                    .to_ascii_uppercase(),
+            );
+            normalized.push_str(&part[1..]);
+        }
+
         return if *current_mark == 1 {
-            base.clone()
+            normalized
         } else {
-            format!("{}{}", base, *current_mark)
+            format!("{}{}", normalized, *current_mark)
         };
     }
 
