@@ -60,9 +60,9 @@ impl NodeScriptifier {
         let mut result: Vec<String> = Vec::new();
 
         let name = if let Some(node_id) = &node.id {
-            node_id.clone()
+            node_id
         } else {
-            node.name.clone()
+            &node.name
         };
         let sanitized = self.sanitizer.sanitize_name(&name);
         result.push(format!(
