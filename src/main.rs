@@ -3,13 +3,17 @@ use std::collections::{HashMap, VecDeque};
 use std::io::{stdin, Read};
 use std::{env, fs, str};
 
-struct NodeScriptifier {
+struct NameSanitizer {
     registry: HashMap<String, u8>,
 }
 
-impl NodeScriptifier {
-    fn new() -> NodeScriptifier {
-        NodeScriptifier {
+struct NodeScriptifier {
+    sanitizer: NameSanitizer,
+}
+
+impl NameSanitizer {
+    fn new() -> NameSanitizer {
+        NameSanitizer {
             registry: Default::default(),
         }
     }
@@ -43,6 +47,14 @@ impl NodeScriptifier {
             format!("{}{}", normalized, *current_mark)
         };
     }
+}
+
+impl NodeScriptifier {
+    fn new() -> NodeScriptifier {
+        NodeScriptifier {
+            sanitizer: NameSanitizer::new(),
+        }
+    }
 
     fn scriptify(&mut self, node: &Element) -> (String, Vec<String>) {
         let mut result: Vec<String> = Vec::new();
@@ -52,7 +64,7 @@ impl NodeScriptifier {
         } else {
             node.name.clone()
         };
-        let sanitized = self.sanitize_name(&name);
+        let sanitized = self.sanitizer.sanitize_name(&name);
         result.push(format!(
             "const {} = document.createElement('{}');",
             sanitized, &node.name
