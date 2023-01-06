@@ -56,48 +56,61 @@ impl NodeScriptifier {
         }
     }
 
-    fn scriptify(&mut self, node: &Element) -> (String, Vec<String>) {
+    fn scriptify(&mut self, node: &Node) -> (String, Vec<String>) {
         let mut result: Vec<String> = Vec::new();
 
-        let name = if let Some(node_id) = &node.id {
-            node_id
-        } else {
-            &node.name
-        };
-        let sanitized = self.sanitizer.sanitize_name(&name);
-        result.push(format!(
-            "const {} = document.createElement('{}');",
-            sanitized, &node.name
-        ));
-
-        if !node.classes.is_empty() {
+        if let Node::Text(text) = node {
+            let name = self.sanitizer.sanitize_name(&("text".to_string()));
             result.push(format!(
-                "{}.classList.add('{}');",
-                sanitized,
-                node.classes.join("', '")
+                "const {} = document.createTextNode('{}');",
+                name, text
             ));
+            return (name, result);
         }
 
-        for (attribute, optional_value) in &node.attributes {
-            // TODO: Maybe handle null values?
-            if let Some(value) = optional_value {
-                if attribute == "style" {
-                    result.push(format!("{}.style.cssText = '{}';", sanitized, value));
-                } else if attribute.starts_with("data-") {
-                    result.push(format!(
-                        "{}.dataset.{} = '{}';",
-                        sanitized, attribute, value
-                    ));
-                } else {
-                    result.push(format!(
-                        "{}.setAttribute('{}', '{}');",
-                        sanitized, attribute, value
-                    ));
+        if let Node::Element(element) = node {
+            let name = if let Some(node_id) = &element.id {
+                node_id
+            } else {
+                &element.name
+            };
+            let sanitized = self.sanitizer.sanitize_name(&name);
+            result.push(format!(
+                "const {} = document.createElement('{}');",
+                sanitized, &element.name
+            ));
+
+            if !element.classes.is_empty() {
+                result.push(format!(
+                    "{}.classList.add('{}');",
+                    sanitized,
+                    element.classes.join("', '")
+                ));
+            }
+
+            for (attribute, optional_value) in &element.attributes {
+                // TODO: Maybe handle null values?
+                if let Some(value) = optional_value {
+                    if attribute == "style" {
+                        result.push(format!("{}.style.cssText = '{}';", sanitized, value));
+                    } else if attribute.starts_with("data-") {
+                        result.push(format!(
+                            "{}.dataset.{} = '{}';",
+                            sanitized, attribute, value
+                        ));
+                    } else {
+                        result.push(format!(
+                            "{}.setAttribute('{}', '{}');",
+                            sanitized, attribute, value
+                        ));
+                    }
                 }
             }
+
+            return (sanitized, result);
         }
 
-        (sanitized, result)
+        unreachable!();
     }
 }
 
@@ -138,30 +151,26 @@ fn main() {
     }
 
     while let Some((indent, parent_name, node)) = stack.pop_front() {
-        match node {
-            Node::Text(text) => println!("{}", text),
-            Node::Element(el) => {
-                let (name, lines) = scriptifier.scriptify(el);
-                if root_element.is_none() {
-                    root_element = Some(name.clone());
-                }
+        if let Node::Comment(_) = node {
+            continue;
+        }
 
-                lines.iter().for_each(|l| source_code.push(l.into()));
+        let (name, lines) = scriptifier.scriptify(node);
+        if root_element.is_none() {
+            root_element = Some(name.clone());
+        }
 
-                for (_, subchild) in el.children.iter().enumerate() {
-                    if let Node::Text(text) = subchild {
-                        source_code.push(format!("{}.textContent = '{}'", name, text));
-                    } else {
-                        stack.push_back((indent + 4, Some(name.clone()), subchild));
-                    }
-                }
+        lines.iter().for_each(|l| source_code.push(l.into()));
 
-                source_code.push("".to_string());
-                if let Some(node_name) = parent_name {
-                    relationships.push((node_name, name));
-                }
+        if let Node::Element(el) = node {
+            for (_, subchild) in el.children.iter().enumerate() {
+                stack.push_back((indent + 4, Some(name.clone()), subchild));
             }
-            Node::Comment(_) => {}
+        }
+
+        source_code.push("".to_string());
+        if let Some(node_name) = parent_name {
+            relationships.push((node_name, name));
         }
     }
 
