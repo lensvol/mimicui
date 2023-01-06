@@ -58,13 +58,13 @@ impl NodeScriptifier {
 
     fn scriptify_text(&mut self, text: &String) -> (String, Vec<String>) {
         let mut result: Vec<String> = Vec::new();
-        let name = self.sanitizer.sanitize_name(&("text".to_string()));
+        let sanitized = self.sanitizer.sanitize_name(&("text".to_string()));
 
         result.push(format!(
             "const {} = document.createTextNode('{}');",
-            name, text
+            sanitized, text
         ));
-        (name, result)
+        (sanitized, result)
     }
 
     fn scriptify_element(&mut self, element: &Element) -> (String, Vec<String>) {
@@ -108,7 +108,7 @@ impl NodeScriptifier {
             }
         }
 
-        return (name.clone(), result);
+        return (sanitized, result);
     }
 
     fn scriptify_comment(&mut self, comment: &String) -> (String, Vec<String>) {
