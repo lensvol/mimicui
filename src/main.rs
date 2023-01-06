@@ -56,61 +56,78 @@ impl NodeScriptifier {
         }
     }
 
-    fn scriptify(&mut self, node: &Node) -> (String, Vec<String>) {
+    fn scriptify_text(&mut self, text: &String) -> (String, Vec<String>) {
+        let mut result: Vec<String> = Vec::new();
+        let name = self.sanitizer.sanitize_name(&("text".to_string()));
+
+        result.push(format!(
+            "const {} = document.createTextNode('{}');",
+            name, text
+        ));
+        (name, result)
+    }
+
+    fn scriptify_element(&mut self, element: &Element) -> (String, Vec<String>) {
         let mut result: Vec<String> = Vec::new();
 
-        if let Node::Text(text) = node {
-            let name = self.sanitizer.sanitize_name(&("text".to_string()));
+        let name = if let Some(node_id) = &element.id {
+            node_id
+        } else {
+            &element.name
+        };
+        let sanitized = self.sanitizer.sanitize_name(&name);
+        result.push(format!(
+            "const {} = document.createElement('{}');",
+            sanitized, &element.name
+        ));
+
+        if !element.classes.is_empty() {
             result.push(format!(
-                "const {} = document.createTextNode('{}');",
-                name, text
+                "{}.classList.add('{}');",
+                sanitized,
+                element.classes.join("', '")
             ));
-            return (name, result);
         }
 
-        if let Node::Element(element) = node {
-            let name = if let Some(node_id) = &element.id {
-                node_id
-            } else {
-                &element.name
-            };
-            let sanitized = self.sanitizer.sanitize_name(&name);
-            result.push(format!(
-                "const {} = document.createElement('{}');",
-                sanitized, &element.name
-            ));
-
-            if !element.classes.is_empty() {
-                result.push(format!(
-                    "{}.classList.add('{}');",
-                    sanitized,
-                    element.classes.join("', '")
-                ));
-            }
-
-            for (attribute, optional_value) in &element.attributes {
-                // TODO: Maybe handle null values?
-                if let Some(value) = optional_value {
-                    if attribute == "style" {
-                        result.push(format!("{}.style.cssText = '{}';", sanitized, value));
-                    } else if attribute.starts_with("data-") {
-                        result.push(format!(
-                            "{}.dataset.{} = '{}';",
-                            sanitized, attribute, value
-                        ));
-                    } else {
-                        result.push(format!(
-                            "{}.setAttribute('{}', '{}');",
-                            sanitized, attribute, value
-                        ));
-                    }
+        for (attribute, optional_value) in &element.attributes {
+            // TODO: Maybe handle null values?
+            if let Some(value) = optional_value {
+                if attribute == "style" {
+                    result.push(format!("{}.style.cssText = '{}';", sanitized, value));
+                } else if attribute.starts_with("data-") {
+                    result.push(format!(
+                        "{}.dataset.{} = '{}';",
+                        sanitized, attribute, value
+                    ));
+                } else {
+                    result.push(format!(
+                        "{}.setAttribute('{}', '{}');",
+                        sanitized, attribute, value
+                    ));
                 }
             }
-
-            return (sanitized, result);
         }
 
-        unreachable!();
+        return (name.clone(), result);
+    }
+
+    fn scriptify_comment(&mut self, comment: &String) -> (String, Vec<String>) {
+        let mut result: Vec<String> = Vec::new();
+        let name = self.sanitizer.sanitize_name(&("comment".to_string()));
+
+        result.push(format!(
+            "const {} = document.createComment('{}');",
+            name, comment
+        ));
+        (name, result)
+    }
+
+    fn scriptify(&mut self, node: &Node) -> (String, Vec<String>) {
+        return match node {
+            Node::Text(text) => self.scriptify_text(text),
+            Node::Element(element) => self.scriptify_element(element),
+            Node::Comment(text) => self.scriptify_comment(text),
+        };
     }
 }
 
@@ -155,7 +172,7 @@ fn main() {
             continue;
         }
 
-        let (name, lines) = scriptifier.scriptify(node);
+        let (name, lines) = scriptifier.scriptify(&node);
         if root_element.is_none() {
             root_element = Some(name.clone());
         }
