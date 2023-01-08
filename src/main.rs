@@ -135,7 +135,6 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let mut scriptifier = NodeScriptifier::new();
     let mut relationships: Vec<(String, String)> = Vec::new();
-    let mut root_element: Option<String> = None;
     let mut source_code: Vec<String> = Vec::new();
     let mut buffer = Vec::new();
 
@@ -156,16 +155,15 @@ fn main() {
 
     let dom = Dom::parse(str::from_utf8(&buffer).unwrap()).unwrap();
 
-    let mut stack: VecDeque<(usize, Option<String>, &Node)> =
-        dom.children.iter().map(|n| (0, None, n)).collect();
+    let mut stack: VecDeque<(usize, String, &Node)> = dom
+        .children
+        .iter()
+        .map(|n| (0, "root".to_string(), n))
+        .collect();
 
-    if stack.len() > 1 {
-        source_code.push("".to_string());
-        source_code.push("const root = document.createElement('div');".to_string());
-        source_code.push("".to_string());
-
-        root_element = Some("root".to_string());
-    }
+    source_code.push("".to_string());
+    source_code.push("const root = document.createElement('div');".to_string());
+    source_code.push("".to_string());
 
     while let Some((indent, parent_name, node)) = stack.pop_front() {
         if let Node::Comment(_) = node {
@@ -173,28 +171,22 @@ fn main() {
         }
 
         let (name, lines) = scriptifier.scriptify(&node);
-        if root_element.is_none() {
-            root_element = Some(name.clone());
-        }
-
         lines.iter().for_each(|l| source_code.push(l.into()));
 
         if let Node::Element(el) = node {
             for (_, subchild) in el.children.iter().enumerate() {
-                stack.push_back((indent + 4, Some(name.clone()), subchild));
+                stack.push_back((indent + 4, name.clone(), subchild));
             }
         }
 
         source_code.push("".to_string());
-        if let Some(node_name) = parent_name {
-            relationships.push((node_name, name));
-        }
+        relationships.push((parent_name, name));
     }
 
     for (parent, child) in relationships.iter() {
         source_code.push(format!("{}.appendChild({});", parent, child));
     }
-    source_code.push(format!("return {};", root_element.unwrap()));
+    source_code.push("return root;".into());
 
     println!("function createMimic() {{");
     source_code.iter().for_each(|l| println!("    {}", l));
