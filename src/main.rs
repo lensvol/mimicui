@@ -166,10 +166,6 @@ fn main() {
     source_code.push("".to_string());
 
     while let Some((indent, parent_name, node)) = stack.pop_front() {
-        if let Node::Comment(_) = node {
-            continue;
-        }
-
         let (name, lines) = scriptifier.scriptify(&node);
         lines.iter().for_each(|l| source_code.push(l.into()));
 
