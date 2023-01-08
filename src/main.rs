@@ -75,7 +75,7 @@ impl NodeScriptifier {
         } else {
             &element.name
         };
-        let sanitized = self.sanitizer.sanitize_name(&name);
+        let sanitized = self.sanitizer.sanitize_name(name);
         result.push(format!(
             "const {} = document.createElement('{}');",
             sanitized, &element.name
@@ -108,7 +108,7 @@ impl NodeScriptifier {
             }
         }
 
-        return (sanitized, result);
+        (sanitized, result)
     }
 
     fn scriptify_comment(&mut self, comment: &String) -> (String, Vec<String>) {
@@ -123,11 +123,11 @@ impl NodeScriptifier {
     }
 
     fn scriptify(&mut self, node: &Node) -> (String, Vec<String>) {
-        return match node {
+        match node {
             Node::Text(text) => self.scriptify_text(text),
             Node::Element(element) => self.scriptify_element(element),
             Node::Comment(text) => self.scriptify_comment(text),
-        };
+        }
     }
 }
 
@@ -155,23 +155,23 @@ fn main() {
 
     let dom = Dom::parse(str::from_utf8(&buffer).unwrap()).unwrap();
 
-    let mut stack: VecDeque<(usize, String, &Node)> = dom
+    let mut stack: VecDeque<(String, &Node)> = dom
         .children
         .iter()
-        .map(|n| (0, "root".to_string(), n))
+        .map(|n| ("root".to_string(), n))
         .collect();
 
     source_code.push("".to_string());
     source_code.push("const root = document.createElement('div');".to_string());
     source_code.push("".to_string());
 
-    while let Some((indent, parent_name, node)) = stack.pop_front() {
-        let (name, lines) = scriptifier.scriptify(&node);
+    while let Some((parent_name, node)) = stack.pop_front() {
+        let (name, lines) = scriptifier.scriptify(node);
         lines.iter().for_each(|l| source_code.push(l.into()));
 
         if let Node::Element(el) = node {
             for (_, subchild) in el.children.iter().enumerate() {
-                stack.push_back((indent + 4, name.clone(), subchild));
+                stack.push_back((name.clone(), subchild));
             }
         }
 
