@@ -131,11 +131,65 @@ impl NodeScriptifier {
     }
 }
 
+struct HTMLScriptifier {}
+
+impl HTMLScriptifier {
+    fn new() -> HTMLScriptifier {
+        HTMLScriptifier {}
+    }
+
+    fn scriptify_html(&mut self, source: &str) -> String {
+        let mut node_transformer = NodeScriptifier::new();
+        let mut relationships: Vec<(String, String)> = Vec::new();
+        let mut source_code: Vec<String> = Vec::new();
+
+        let dom = Dom::parse(&source).unwrap();
+
+        let mut stack: VecDeque<(String, &Node)> = dom
+            .children
+            .iter()
+            .map(|n| ("root".to_string(), n))
+            .collect();
+
+        source_code.push("".to_string());
+        source_code.push("const root = document.createElement('div');".to_string());
+        source_code.push("".to_string());
+
+        while let Some((parent_name, node)) = stack.pop_front() {
+            let (name, lines) = node_transformer.scriptify(node);
+            lines.iter().for_each(|l| source_code.push(l.into()));
+
+            if let Node::Element(el) = node {
+                for (_, subchild) in el.children.iter().enumerate() {
+                    stack.push_back((name.clone(), subchild));
+                }
+            }
+
+            source_code.push("".to_string());
+            relationships.push((parent_name, name));
+        }
+
+        for (parent, child) in relationships.iter() {
+            source_code.push(format!("{}.appendChild({});", parent, child));
+        }
+        source_code.push("return root;".into());
+
+        let mut result = String::new();
+        result.push_str("function createMimic() {");
+        source_code.iter().for_each(|l| {
+            result.push_str("    ");
+            result.push_str(l);
+            result.push_str("\n");
+        });
+        result.push_str("}");
+
+        return result;
+    }
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let mut scriptifier = NodeScriptifier::new();
-    let mut relationships: Vec<(String, String)> = Vec::new();
-    let mut source_code: Vec<String> = Vec::new();
+    let mut scriptifier = HTMLScriptifier::new();
     let mut buffer = Vec::new();
 
     if args.len() < 2 {
@@ -153,40 +207,10 @@ fn main() {
         buffer = Vec::from(fs::read_to_string("fragment.html").unwrap());
     }
 
-    let dom = Dom::parse(str::from_utf8(&buffer).unwrap()).unwrap();
-
-    let mut stack: VecDeque<(String, &Node)> = dom
-        .children
-        .iter()
-        .map(|n| ("root".to_string(), n))
-        .collect();
-
-    source_code.push("".to_string());
-    source_code.push("const root = document.createElement('div');".to_string());
-    source_code.push("".to_string());
-
-    while let Some((parent_name, node)) = stack.pop_front() {
-        let (name, lines) = scriptifier.scriptify(node);
-        lines.iter().for_each(|l| source_code.push(l.into()));
-
-        if let Node::Element(el) = node {
-            for (_, subchild) in el.children.iter().enumerate() {
-                stack.push_back((name.clone(), subchild));
-            }
-        }
-
-        source_code.push("".to_string());
-        relationships.push((parent_name, name));
-    }
-
-    for (parent, child) in relationships.iter() {
-        source_code.push(format!("{}.appendChild({});", parent, child));
-    }
-    source_code.push("return root;".into());
-
-    println!("function createMimic() {{");
-    source_code.iter().for_each(|l| println!("    {}", l));
-    println!("}}");
+    print!(
+        "{}",
+        scriptifier.scriptify_html(str::from_utf8(&buffer).unwrap())
+    );
 
     std::process::exit(0);
 }
