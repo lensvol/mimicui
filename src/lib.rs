@@ -1,7 +1,5 @@
 use html_parser::{Dom, Element, Node};
 use std::collections::{HashMap, VecDeque};
-use std::io::{stdin, Read};
-use std::{env, fs, str};
 
 struct NameSanitizer {
     registry: HashMap<String, u8>,
@@ -131,14 +129,14 @@ impl NodeScriptifier {
     }
 }
 
-struct HTMLScriptifier {}
+pub struct HTMLScriptifier {}
 
 impl HTMLScriptifier {
-    fn new() -> HTMLScriptifier {
+    pub fn new() -> HTMLScriptifier {
         HTMLScriptifier {}
     }
 
-    fn scriptify_html(&mut self, source: &str) -> String {
+    pub fn scriptify_html(&mut self, source: &str) -> String {
         let mut node_transformer = NodeScriptifier::new();
         let mut relationships: Vec<(String, String)> = Vec::new();
         let mut source_code: Vec<String> = Vec::new();
@@ -185,32 +183,4 @@ impl HTMLScriptifier {
 
         return result;
     }
-}
-
-fn main() {
-    let args: Vec<String> = env::args().collect();
-    let mut scriptifier = HTMLScriptifier::new();
-    let mut buffer = Vec::new();
-
-    if args.len() < 2 {
-        println!("Usage: mimicui < - | FILE >");
-        std::process::exit(-1);
-    }
-
-    let source = args.get(1).unwrap();
-
-    if source == "-" {
-        stdin()
-            .read_to_end(&mut buffer)
-            .expect("Nothing to process!");
-    } else {
-        buffer = Vec::from(fs::read_to_string("fragment.html").unwrap());
-    }
-
-    print!(
-        "{}",
-        scriptifier.scriptify_html(str::from_utf8(&buffer).unwrap())
-    );
-
-    std::process::exit(0);
 }
