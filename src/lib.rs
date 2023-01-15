@@ -140,8 +140,14 @@ impl NodeScriptifier {
 
 pub struct HTMLScriptifier {}
 
+impl Default for HTMLScriptifier {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl HTMLScriptifier {
-    pub fn new() -> HTMLScriptifier {
+    pub fn new() -> Self {
         HTMLScriptifier {}
     }
 
@@ -150,7 +156,7 @@ impl HTMLScriptifier {
         let mut relationships: Vec<(String, String)> = Vec::new();
         let mut source_code: Vec<String> = Vec::new();
 
-        let dom = Dom::parse(&source).unwrap();
+        let dom = Dom::parse(source).unwrap();
 
         let mut stack: VecDeque<(String, &Node)> = dom
             .children
@@ -179,6 +185,7 @@ impl HTMLScriptifier {
         for (parent, child) in relationships.iter() {
             source_code.push(format!("{}.appendChild({});", parent, child));
         }
+        source_code.push("".into());
         source_code.push("return root;".into());
 
         let mut result = String::new();
@@ -186,10 +193,10 @@ impl HTMLScriptifier {
         source_code.iter().for_each(|l| {
             result.push_str("    ");
             result.push_str(l);
-            result.push_str("\n");
+            result.push('\n');
         });
-        result.push_str("}");
+        result.push('}');
 
-        return result;
+        result
     }
 }
