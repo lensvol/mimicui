@@ -1,6 +1,8 @@
 use html_parser::{Dom, Element, Node};
 use std::collections::{HashMap, VecDeque};
 
+use wasm_bindgen::prelude::*;
+
 struct NameSanitizer {
     registry: HashMap<String, u8>,
 }
@@ -199,4 +201,9 @@ impl HTMLScriptifier {
 
         result
     }
+}
+
+#[wasm_bindgen]
+pub fn html_to_js(html_code: String) -> String {
+    HTMLScriptifier::new().scriptify_html(&html_code)
 }
