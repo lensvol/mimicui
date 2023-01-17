@@ -18,8 +18,8 @@ impl NameSanitizer {
         }
     }
 
-    fn sanitize_name(&mut self, base: &String) -> String {
-        let name = match base.as_str() {
+    fn sanitize_name(&mut self, base: &str) -> String {
+        let name = match base {
             "a" => "link".to_string(),
             "div" => "container".to_string(),
             "p" => "paragraph".to_string(),
@@ -65,7 +65,7 @@ impl NodeScriptifier {
         }
     }
 
-    fn scriptify_text(&mut self, text: &String) -> (String, Vec<String>) {
+    fn scriptify_text(&mut self, text: &str) -> (String, Vec<String>) {
         let mut result: Vec<String> = Vec::new();
         let sanitized = self.sanitizer.sanitize_name(&("text".to_string()));
 
@@ -120,7 +120,7 @@ impl NodeScriptifier {
         (sanitized, result)
     }
 
-    fn scriptify_comment(&mut self, comment: &String) -> (String, Vec<String>) {
+    fn scriptify_comment(&mut self, comment: &str) -> (String, Vec<String>) {
         let mut result: Vec<String> = Vec::new();
         let name = self.sanitizer.sanitize_name(&("comment".to_string()));
 
