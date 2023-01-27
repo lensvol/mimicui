@@ -22,6 +22,10 @@ impl NameSanitizer {
         let name = match base {
             "a" => "link".to_string(),
             "div" => "container".to_string(),
+            "b" => "bold".to_string(),
+            "i" => "italics".to_string(),
+            "pre" => "preformatted".to_string(),
+            "code" => "codeBlock".to_string(),
             "p" => "paragraph".to_string(),
             "span" => "textSpan".to_string(),
             _ => {
