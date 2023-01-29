@@ -27,6 +27,7 @@ impl NameSanitizer {
             "pre" => "preformatted".to_string(),
             "code" => "codeBlock".to_string(),
             "p" => "paragraph".to_string(),
+            "h" => "heading".to_string(),
             "span" => "textSpan".to_string(),
             _ => {
                 let parts = base
