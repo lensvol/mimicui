@@ -104,21 +104,19 @@ impl NodeScriptifier {
         }
 
         for (attribute, optional_value) in &element.attributes {
-            // TODO: Maybe handle null values?
-            if let Some(value) = optional_value {
-                if attribute == "style" {
-                    result.push(format!("{}.style.cssText = '{}';", sanitized, value));
-                } else if attribute.starts_with("data-") {
-                    result.push(format!(
-                        "{}.dataset.{} = '{}';",
-                        sanitized, attribute, value
-                    ));
-                } else {
-                    result.push(format!(
-                        "{}.setAttribute('{}', '{}');",
-                        sanitized, attribute, value
-                    ));
-                }
+            let value = optional_value.unwrap_or("".to_string());
+            if attribute == "style" {
+                result.push(format!("{}.style.cssText = '{}';", sanitized, value));
+            } else if attribute.starts_with("data-") {
+                result.push(format!(
+                    "{}.dataset.{} = '{}';",
+                    sanitized, attribute, value
+                ));
+            } else {
+                result.push(format!(
+                    "{}.setAttribute('{}', '{}');",
+                    sanitized, attribute, value
+                ));
             }
         }
 
