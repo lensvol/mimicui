@@ -72,7 +72,7 @@ impl NodeScriptifier {
 
     fn scriptify_text(&mut self, text: &str) -> (String, Vec<String>) {
         let mut result: Vec<String> = Vec::new();
-        let sanitized = self.sanitizer.sanitize_name(&("text".to_string()));
+        let sanitized = self.sanitizer.sanitize_name("text");
 
         result.push(format!(
             "const {sanitized} = document.createTextNode('{text}');",
@@ -120,7 +120,7 @@ impl NodeScriptifier {
 
     fn scriptify_comment(&mut self, comment: &str) -> (String, Vec<String>) {
         let mut result: Vec<String> = Vec::new();
-        let name = self.sanitizer.sanitize_name(&("comment".to_string()));
+        let name = self.sanitizer.sanitize_name("comment");
 
         result.push(format!(
             "const {name} = document.createComment('{comment}');",
