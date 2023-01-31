@@ -104,7 +104,7 @@ impl NodeScriptifier {
         }
 
         for (attribute, optional_value) in &element.attributes {
-            let value = optional_value.unwrap_or("".to_string());
+            let value = optional_value.clone().unwrap_or("".to_string());
             if attribute == "style" {
                 result.push(format!("{}.style.cssText = '{}';", sanitized, value));
             } else if attribute.starts_with("data-") {
