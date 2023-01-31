@@ -75,8 +75,7 @@ impl NodeScriptifier {
         let sanitized = self.sanitizer.sanitize_name(&("text".to_string()));
 
         result.push(format!(
-            "const {} = document.createTextNode('{}');",
-            sanitized, text
+            "const {sanitized} = document.createTextNode('{text}');",
         ));
         (sanitized, result)
     }
@@ -106,16 +105,12 @@ impl NodeScriptifier {
         for (attribute, optional_value) in &element.attributes {
             let value = optional_value.clone().unwrap_or("".to_string());
             if attribute == "style" {
-                result.push(format!("{}.style.cssText = '{}';", sanitized, value));
+                result.push(format!("{sanitized}.style.cssText = '{value}';"));
             } else if attribute.starts_with("data-") {
-                result.push(format!(
-                    "{}.dataset.{} = '{}';",
-                    sanitized, attribute, value
-                ));
+                result.push(format!("{sanitized}.dataset.{attribute} = '{value}';",));
             } else {
                 result.push(format!(
-                    "{}.setAttribute('{}', '{}');",
-                    sanitized, attribute, value
+                    "{sanitized}.setAttribute('{attribute}', '{value}');",
                 ));
             }
         }
@@ -128,8 +123,7 @@ impl NodeScriptifier {
         let name = self.sanitizer.sanitize_name(&("comment".to_string()));
 
         result.push(format!(
-            "const {} = document.createComment('{}');",
-            name, comment
+            "const {name} = document.createComment('{comment}');",
         ));
         (name, result)
     }
@@ -196,7 +190,7 @@ impl HTMLScriptifier {
             }
 
             previous_parent = Some(parent);
-            source_code.push(format!("{}.appendChild({});", parent, child));
+            source_code.push(format!("{parent}.appendChild({child});"));
         }
         source_code.push("".into());
         source_code.push("return root;".into());
