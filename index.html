@@ -7,6 +7,10 @@
           href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
     <style>
+textarea {
+     resize: none;
+}
+
 /* Taken from https://coder-coder.com/display-divs-side-by-side/#flexbox-method */
 .flex-container {
     display: flex;
@@ -84,9 +88,7 @@
 
     <div class="flex-container">
         <div class="flex-child">
-            <textarea id="html-code" class="fill" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false">
-                <b>Hello, world!</b>
-            </textarea>
+            <textarea id="html-code" class="fill" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false"><b>Hello, world!</b></textarea>
         </div>
         <div class="vertical-button prevent-select" id="convert-button">
             <p>Convert</p>
