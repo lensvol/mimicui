@@ -183,8 +183,8 @@ impl HTMLScriptifier {
 
         let mut previous_parent: Option<&String> = None;
         for (parent, child) in relationships.iter() {
-            if let Some(identifiter) = &previous_parent {
-                if *identifiter != parent {
+            if let Some(identifier) = &previous_parent {
+                if *identifier != parent {
                     source_code.push("".into());
                 }
             }
