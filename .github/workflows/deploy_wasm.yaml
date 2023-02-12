@@ -2,7 +2,7 @@ name: Deploy WASM version
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
