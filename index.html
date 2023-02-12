@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>MimicUI</title>
+    <link rel="stylesheet"
+          href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <style>
+/* Taken from https://coder-coder.com/display-divs-side-by-side/#flexbox-method */
+.flex-container {
+    display: flex;
+}
+
+.flex-child {
+    flex: 1;
+    border: 1px solid #000000;
+}
+
+.flex-child:first-child {
+    margin-right: 10px;
+}
+
+.js-container {
+    background-color: #f3f3f3;
+}
+
+/* Shamelessly copied from https://www.w3schools.com/howto/howto_css_disable_text_selection.asp */
+.prevent-select {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
+
+/* Shamelessly cribbed from https://stackoverflow.com/questions/20880244/rotate-text-90deg-and-vertically-align-with-div */
+.vertical-button {
+    transform: rotate(180deg);
+    writing-mode: vertical-lr;
+    text-align: center;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-right: 10px;
+    border: 1px solid #000000;
+    border-radius:10px;
+}
+
+.vertical-button:hover {
+    background-color: #f3f3f3;
+    transition: 0.3s;
+}
+
+.vertical-button:active {
+    background-color: #ab5656;
+}
+
+/* This I also copied from https://stackoverflow.com/questions/3165083/how-to-make-textarea-to-fill-div-block */
+.fill {
+     width: 100%;
+     height: 100%;
+     margin: 0px;
+     -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+     -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+     box-sizing: border-box;         /* Opera/IE 8+ */
+}
+    </style>
+</head>
+<body>
+    <script type="module" language="JavaScript">
+        import init, { html_to_js } from "./pkg/mimicui.js";
+
+        const convertButton = document.getElementById("convert-button");
+        const htmlArea = document.getElementById("html-code");
+        const jsArea = document.getElementById("result-js");
+
+        init().then(() => {
+          convertButton.addEventListener("click", (ev) => {
+            jsArea.textContent = html_to_js(htmlArea.value);
+            hljs.highlightElement(jsArea);
+          });
+          jsArea.textContent = html_to_js(htmlArea.value);
+          hljs.highlightElement(jsArea);
+        });
+    </script>
+
+    <div class="flex-container">
+        <div class="flex-child">
+            <textarea id="html-code" class="fill" data-gramm="false" data-gramm_editor="false" data-enable-grammarly="false">
+                <b>Hello, world!</b>
+            </textarea>
+        </div>
+        <div class="vertical-button prevent-select" id="convert-button">
+            <p>Convert</p>
+        </div>
+        <div class="flex-child js-container">
+              <pre class="fill">
+                  <code id="result-js">
+
+                  </code>
+              </pre>
+        </div>
+    </div>
+</body>
+</html>
