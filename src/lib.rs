@@ -172,9 +172,10 @@ impl HTMLScriptifier {
 
         source_code.push("".to_string());
         source_code.push("const root = document.createElement('div');".to_string());
-        source_code.push("".to_string());
 
         while let Some((parent_name, node)) = stack.pop_front() {
+            source_code.push("".to_string());
+
             let (name, lines) = node_transformer.scriptify(node);
             lines.iter().for_each(|l| source_code.push(l.into()));
 
@@ -184,7 +185,6 @@ impl HTMLScriptifier {
                 }
             }
 
-            source_code.push("".to_string());
             relationships.push((parent_name, name));
         }
 
@@ -194,12 +194,15 @@ impl HTMLScriptifier {
                 if *identifier != parent {
                     source_code.push("".into());
                 }
+            } else {
+                source_code.push("".to_string());
             }
 
             previous_parent = Some(parent);
             source_code.push(format!("{parent}.appendChild({child});"));
         }
-        source_code.push("".into());
+        source_code.push("".to_string());
+
         source_code.push("return root;".into());
 
         let mut result = String::new();
