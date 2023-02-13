@@ -7,10 +7,6 @@ struct NameSanitizer {
     registry: HashMap<String, u8>,
 }
 
-struct NodeScriptifier {
-    sanitizer: NameSanitizer,
-}
-
 impl NameSanitizer {
     fn new() -> NameSanitizer {
         NameSanitizer {
@@ -61,6 +57,10 @@ impl NameSanitizer {
             format!("{}{}", name, *current_mark)
         };
     }
+}
+
+struct NodeScriptifier {
+    sanitizer: NameSanitizer,
 }
 
 impl NodeScriptifier {
