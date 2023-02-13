@@ -59,9 +59,9 @@ impl Sanitizer {
     }
 
     fn sanitize_text(&self, base: &str) -> String {
-        return str::replace(base, "\\", "\\\\")
-            .replace("\"", "\\\"")
-            .replace("'", "\\'");
+        str::replace(base, "\\", "\\\\")
+            .replace('\"', "\\\"")
+            .replace('\'', "\\'")
     }
 }
 
