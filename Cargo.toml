@@ -2,6 +2,10 @@
 name = "mimicui"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "Toy HTML-to-JS converter."
+repository = "https://github.com/lensvol/mimicui"
+
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
