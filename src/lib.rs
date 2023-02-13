@@ -3,14 +3,14 @@ use std::collections::{HashMap, VecDeque};
 
 use wasm_bindgen::prelude::*;
 
-struct NameSanitizer {
-    registry: HashMap<String, u8>,
+struct Sanitizer {
+    name_registry: HashMap<String, u8>,
 }
 
-impl NameSanitizer {
-    fn new() -> NameSanitizer {
-        NameSanitizer {
-            registry: Default::default(),
+impl Sanitizer {
+    fn new() -> Sanitizer {
+        Sanitizer {
+            name_registry: Default::default(),
         }
     }
 
@@ -48,7 +48,7 @@ impl NameSanitizer {
             }
         };
 
-        let current_mark = self.registry.entry(name.clone()).or_insert(0);
+        let current_mark = self.name_registry.entry(name.clone()).or_insert(0);
         *current_mark += 1;
 
         return if *current_mark == 1 {
@@ -57,16 +57,22 @@ impl NameSanitizer {
             format!("{}{}", name, *current_mark)
         };
     }
+
+    fn sanitize_text(&self, base: &str) -> String {
+        return str::replace(base, "\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("'", "\\'");
+    }
 }
 
 struct NodeScriptifier {
-    sanitizer: NameSanitizer,
+    sanitizer: Sanitizer,
 }
 
 impl NodeScriptifier {
     fn new() -> NodeScriptifier {
         NodeScriptifier {
-            sanitizer: NameSanitizer::new(),
+            sanitizer: Sanitizer::new(),
         }
     }
 
@@ -75,7 +81,8 @@ impl NodeScriptifier {
         let sanitized = self.sanitizer.sanitize_name("text");
 
         result.push(format!(
-            "const {sanitized} = document.createTextNode('{text}');",
+            "const {sanitized} = document.createTextNode('{}');",
+            self.sanitizer.sanitize_text(text)
         ));
         (sanitized, result)
     }
