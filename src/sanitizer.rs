@@ -61,3 +61,38 @@ impl Sanitizer {
             .replace('\'', "\\'")
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::sanitizer::Sanitizer;
+
+    #[test]
+    fn test_not_seen_before_name_not_changed() {
+        let mut sanitizer = Sanitizer::new();
+        assert_eq!(sanitizer.sanitize_name("test"), "test");
+    }
+
+    #[test]
+    fn test_previously_seen_name_changed_to_prevent_collisions() {
+        let mut sanitizer = Sanitizer::new();
+
+        let first = sanitizer.sanitize_name("test");
+        let second = sanitizer.sanitize_name("test");
+        let third = sanitizer.sanitize_name("test");
+
+        assert_eq!(first, "test");
+        assert_eq!(second, "test2");
+        assert_eq!(third, "test3");
+    }
+
+    #[test]
+    fn test_seen_special_name_also_gets_modified_to_prevent_collisions() {
+        let mut sanitizer = Sanitizer::new();
+
+        let first = sanitizer.sanitize_name("p");
+        let second = sanitizer.sanitize_name("p");
+
+        assert_eq!(first, "paragraph");
+        assert_eq!(second, "paragraph2");
+    }
+}
