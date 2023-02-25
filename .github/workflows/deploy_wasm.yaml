@@ -1,8 +1,10 @@
 name: Deploy WASM version
 on:
   push:
-    branches:
-      - main
+    paths:
+      - src/**
+      - Cargo.toml
+      - index.html
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
