@@ -22,6 +22,9 @@ path = "src/bin.rs"
 html_parser = "0.6.3"
 wasm-bindgen = "0.2.83"
 
+[dev-dependencies]
+rstest = "0.16.0"
+
 [profile.release]
 lto = true
 opt-level = 's'

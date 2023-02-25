@@ -64,6 +64,8 @@ impl Sanitizer {
 
 #[cfg(test)]
 mod tests {
+    use rstest::rstest;
+
     use crate::sanitizer::Sanitizer;
 
     #[test]
@@ -94,5 +96,24 @@ mod tests {
 
         assert_eq!(first, "paragraph");
         assert_eq!(second, "paragraph2");
+    }
+
+    #[rstest]
+    #[case("p", "paragraph")]
+    #[case("a", "link")]
+    #[case("div", "container")]
+    #[case("b", "bold")]
+    #[case("i", "italics")]
+    #[case("pre", "preformatted")]
+    #[case("h", "heading")]
+    #[case("span", "textSpan")]
+    fn test_tag_names_are_replaced_with_more_readable_ones(
+        #[case] input: &str,
+        #[case] expected: &str,
+    ) {
+        let mut sanitizer = Sanitizer::new();
+        let actual = sanitizer.sanitize_name(input);
+
+        assert_eq!(actual, expected);
     }
 }
