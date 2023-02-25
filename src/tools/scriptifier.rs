@@ -81,6 +81,7 @@ impl NodeScriptifier {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use crate::tools::scriptifier::NodeScriptifier;
     use html_parser::Node;
