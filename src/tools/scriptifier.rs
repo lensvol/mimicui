@@ -1,6 +1,6 @@
 use html_parser::{Element, Node};
 
-use crate::sanitizer::Sanitizer;
+use crate::tools::sanitizer::Sanitizer;
 
 pub struct NodeScriptifier {
     sanitizer: Sanitizer,
@@ -82,7 +82,7 @@ impl NodeScriptifier {
 }
 
 mod tests {
-    use crate::scriptifier::NodeScriptifier;
+    use crate::tools::scriptifier::NodeScriptifier;
     use html_parser::Node;
 
     #[test]

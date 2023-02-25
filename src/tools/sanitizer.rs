@@ -66,7 +66,7 @@ impl Sanitizer {
 mod tests {
     use rstest::rstest;
 
-    use crate::sanitizer::Sanitizer;
+    use crate::tools::sanitizer::Sanitizer;
 
     #[test]
     fn test_not_seen_before_name_not_changed() {

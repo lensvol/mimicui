@@ -1,12 +1,11 @@
-mod sanitizer;
-mod scriptifier;
+mod tools;
 
 use std::collections::VecDeque;
 
-use crate::scriptifier::NodeScriptifier;
-
 use html_parser::{Dom, Node};
 use wasm_bindgen::prelude::*;
+
+use crate::tools::scriptifier::NodeScriptifier;
 
 pub struct HTMLScriptifier {}
 
