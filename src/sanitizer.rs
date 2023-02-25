@@ -98,6 +98,27 @@ mod tests {
         assert_eq!(second, "paragraph2");
     }
 
+    #[test]
+    fn test_text_single_quotes_are_sanitized_properly() {
+        let sanitizer = Sanitizer::new();
+        let actual = sanitizer.sanitize_text("'Hello, world!'");
+        assert_eq!(actual, "\\'Hello, world!\\'");
+    }
+
+    #[test]
+    fn test_text_double_quotes_are_sanitized_properly() {
+        let sanitizer = Sanitizer::new();
+        let actual = sanitizer.sanitize_text("\"Hello, world!\"");
+        assert_eq!(actual, "\\\"Hello, world!\\\"");
+    }
+
+    #[test]
+    fn test_text_backslashes_are_sanitized_properly() {
+        let sanitizer = Sanitizer::new();
+        let actual = sanitizer.sanitize_text("This is how it ends: \\n");
+        assert_eq!(actual, "This is how it ends: \\\\n");
+    }
+
     #[rstest]
     #[case("p", "paragraph")]
     #[case("a", "link")]
