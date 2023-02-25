@@ -1,90 +1,12 @@
+mod sanitizer;
+mod scriptifier;
+
 use std::collections::VecDeque;
 
-use html_parser::{Dom, Element, Node};
+use crate::scriptifier::NodeScriptifier;
+
+use html_parser::{Dom, Node};
 use wasm_bindgen::prelude::*;
-
-use crate::sanitizer::Sanitizer;
-
-mod sanitizer;
-
-struct NodeScriptifier {
-    sanitizer: Sanitizer,
-}
-
-impl NodeScriptifier {
-    fn new() -> NodeScriptifier {
-        NodeScriptifier {
-            sanitizer: Sanitizer::new(),
-        }
-    }
-
-    fn scriptify_text(&mut self, text: &str) -> (String, Vec<String>) {
-        let mut result: Vec<String> = Vec::new();
-        let sanitized = self.sanitizer.sanitize_name("text");
-
-        result.push(format!(
-            "const {sanitized} = document.createTextNode('{}');",
-            self.sanitizer.sanitize_text(text)
-        ));
-        (sanitized, result)
-    }
-
-    fn scriptify_element(&mut self, element: &Element) -> (String, Vec<String>) {
-        let mut result: Vec<String> = Vec::new();
-
-        let name = if let Some(node_id) = &element.id {
-            node_id
-        } else {
-            &element.name
-        };
-        let sanitized = self.sanitizer.sanitize_name(name);
-        result.push(format!(
-            "const {} = document.createElement('{}');",
-            sanitized, &element.name
-        ));
-
-        if !element.classes.is_empty() {
-            result.push(format!(
-                "{}.classList.add('{}');",
-                sanitized,
-                element.classes.join("', '")
-            ));
-        }
-
-        for (attribute, optional_value) in &element.attributes {
-            let value = optional_value.clone().unwrap_or("".to_string());
-            if attribute == "style" {
-                result.push(format!("{sanitized}.style.cssText = '{value}';"));
-            } else if attribute.starts_with("data-") {
-                result.push(format!("{sanitized}.dataset.{attribute} = '{value}';",));
-            } else {
-                result.push(format!(
-                    "{sanitized}.setAttribute('{attribute}', '{value}');",
-                ));
-            }
-        }
-
-        (sanitized, result)
-    }
-
-    fn scriptify_comment(&mut self, comment: &str) -> (String, Vec<String>) {
-        let mut result: Vec<String> = Vec::new();
-        let name = self.sanitizer.sanitize_name("comment");
-
-        result.push(format!(
-            "const {name} = document.createComment('{comment}');",
-        ));
-        (name, result)
-    }
-
-    fn scriptify(&mut self, node: &Node) -> (String, Vec<String>) {
-        match node {
-            Node::Text(text) => self.scriptify_text(text),
-            Node::Element(element) => self.scriptify_element(element),
-            Node::Comment(text) => self.scriptify_comment(text),
-        }
-    }
-}
 
 pub struct HTMLScriptifier {}
 
