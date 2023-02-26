@@ -27,8 +27,8 @@ jobs:
       - name: Run Clippy
         uses: actions-rs/cargo@v1
         with:
-          command: install
-          args: clippy --package=mimicui
+          command: clippy
+          args: --package=mimicui
 
       - name: Build app
         uses: actions-rs/cargo@v1
