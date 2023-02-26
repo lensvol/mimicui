@@ -25,7 +25,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: install
-          args: install clippy
+          args: clippy
 
       - name: Run Clippy
         uses: actions-rs/cargo@v1
