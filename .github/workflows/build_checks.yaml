@@ -2,6 +2,7 @@ name: build
 on:
   push:
     paths:
+      - .github/workflows/build_checks.yaml
       - src/**
       - Cargo.toml
 
@@ -21,14 +22,14 @@ jobs:
         with:
           toolchain: stable
 
-      - name: Install rust-clippy
+      - name: Install Clippy
         run:  rustup component add clippy
 
       - name: Run Clippy
-        uses: actions-rs/cargo@v1
+        uses: actions-rs/clippy-check@v1
         with:
-          command: clippy
-          args: --package=mimicui
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features
 
       - name: Build app
         uses: actions-rs/cargo@v1
