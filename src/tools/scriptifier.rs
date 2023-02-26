@@ -65,9 +65,10 @@ impl NodeScriptifier {
     pub fn scriptify_comment(&mut self, comment: &str) -> (String, Vec<String>) {
         let mut result: Vec<String> = Vec::new();
         let name = self.sanitizer.sanitize_name("comment");
+        let sanitized_comment = self.sanitizer.sanitize_text(comment);
 
         result.push(format!(
-            "const {name} = document.createComment('{comment}');",
+            "const {name} = document.createComment('{sanitized_comment}');",
         ));
         (name, result)
     }
@@ -95,6 +96,19 @@ mod tests {
         assert_eq!(
             code,
             vec!["const text = document.createTextNode('Hello, world!');"]
+        );
+    }
+
+    #[test]
+    fn test_special_symbols_in_comment_are_handled_properly() {
+        let comment = "Hey\\n".to_string();
+        let mut scriptifier = NodeScriptifier::new();
+        let (name, code) = scriptifier.scriptify(&Node::Comment(comment));
+
+        assert_eq!(name, "comment");
+        assert_eq!(
+            code,
+            vec!["const comment = document.createComment('Hey\\\\n');"]
         );
     }
 }
