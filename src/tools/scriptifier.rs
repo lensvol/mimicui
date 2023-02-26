@@ -87,7 +87,7 @@ mod tests {
     use html_parser::Node;
 
     #[test]
-    fn test_comment_is_scriptified_correctly() {
+    fn test_simple_text_is_scriptified_correctly() {
         let mut scriptifier = NodeScriptifier::new();
         let (name, code) = scriptifier.scriptify(&Node::Text("Hello, world!".into()));
 
