@@ -1,0 +1,44 @@
+name: build
+on:
+  push:
+    paths:
+      - src/**
+      - Cargo.toml
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Build checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Install stable Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Install rust-clippy
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: install clippy
+
+      - name: Run Clippy
+        uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: clippy --package=mimicui
+
+      - name: Build app
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+
+      - name: Run tests
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
