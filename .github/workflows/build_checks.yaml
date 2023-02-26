@@ -22,10 +22,7 @@ jobs:
           toolchain: stable
 
       - name: Install rust-clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: clippy
+        run:  rustup component add clippy
 
       - name: Run Clippy
         uses: actions-rs/cargo@v1
